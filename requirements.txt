@@ -1,5 +1,6 @@
 flask
-opencv-python
-pillow
+flask-cors
+opencv-python-headless
 numpy
+pillow
 scipy

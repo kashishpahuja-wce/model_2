@@ -1,0 +1,19 @@
+{
+  "buildCommand": "cd \"Image Processing Website\" && npm install && npm run build",
+  "outputDirectory": "Image Processing Website/dist",
+  "functions": {
+    "api/**/*.py": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/Image Processing Website/index.html"
+    }
+  ]
+}
