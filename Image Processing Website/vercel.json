@@ -2,7 +2,7 @@
   "outputDirectory": "dist",
   "functions": {
     "api/**/*.py": {
-      "excludeFiles": "{node_modules,src,public,dist}/**"
+      "excludeFiles": "node_modules/**"
     }
   },
   "rewrites": [
