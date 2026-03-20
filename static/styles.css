@@ -1,0 +1,55 @@
+:root {
+  --bg: #05070a;
+  --bg-2: #151b24;
+  --card: #1b222e;
+  --card-border: #2b3446;
+  --text: #e9f0ff;
+  --muted: #8a98b0;
+  --accent: #a855f7;
+  --accent-2: #ec4899;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif; }
+
+body {
+  background: radial-gradient(circle at top, #2c3b5f 0%, #05070a 46%, #020306 100%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app-shell { max-width: 1100px; margin: 0 auto; padding: 1.25rem; }
+.topbar { display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(198, 206, 226, 0.15); background: rgba(17, 24, 39, 0.6); border-radius: 12px; padding: 0.8rem 1rem; backdrop-filter: blur(12px); }
+.brand { display: flex; align-items: center; gap: 0.8rem; }
+.brand-icon { width: 2.4rem; height: 2.4rem; border-radius: 0.7rem; display: grid; place-items: center; font-size: 1.1rem; background: linear-gradient(135deg, #7c3aed, #db2777); }
+.brand h1 { margin: 0; font-size: 1.25rem; font-weight: 800; }
+.brand p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.account-chip { border: 1px solid rgba(139, 92, 246, 0.4); color: #e9d5ff; background: rgba(99, 102, 241, 0.2); border-radius: 999px; padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+
+.main-content { margin-top: 1.1rem; display: grid; gap: 1rem; }
+.hero { text-align: center; padding: 1.75rem; border-radius: 14px; background: linear-gradient(135deg, rgba(44, 52, 83, 0.7), rgba(19, 24, 49, 0.9)); border: 1px solid rgba(118, 135, 178, 0.2); }
+.hero h2 { margin: 0 0 0.45rem 0; font-size: clamp(1.4rem, 2.5vw, 2.2rem); letter-spacing: 0.01em; }
+.hero p { margin: 0; color: var(--muted); }
+
+.card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 1.1rem; box-shadow: 0 16px 38px rgba(0, 0, 0, 0.25); }
+.upload-card { display: grid; gap: 0.75rem; }
+.upload-form { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+.upload-form input[type="file"] { background: #131a2a; color: var(--text); font-size: 0.95rem; border: 1px solid #273651; border-radius: 0.65rem; padding: 0.66rem; width: 100%; max-width: 410px; }
+.upload-form button { appearance: none; border: none; background: linear-gradient(120deg, var(--accent), var(--accent-2)); color: #fff; padding: 0.72rem 1rem; border-radius: 0.65rem; cursor: pointer; font-weight: 700; letter-spacing: 0.02em; transition: transform 0.16s ease, filter 0.16s ease; }
+.upload-form button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.hint { font-size: 0.85rem; color: var(--muted); text-align: center; }
+
+.preview-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+.preview-card { display: flex; flex-direction: column; gap: 0.75rem; }
+.preview-card h3 { margin: 0 0 0.4rem 0; color: #f8fafc; }
+.preview-card img { width: 100%; border-radius: 0.8rem; border: 1px solid #2c3445; max-height: 380px; object-fit: contain; background: #0f172a; }
+.download-btn { margin-top: 0.45rem; align-self: start; display: inline-flex; gap: 0.55rem; text-decoration: none; padding: 0.6rem 0.9rem; border: 1px solid rgba(192, 132, 252, 0.4); background: linear-gradient(120deg, #9333ea, #ec4899); color: white; border-radius: 0.65rem; font-weight: 700; }
+.download-btn:hover { opacity: 0.92; }
+
+.footer-card { text-align: center; color: var(--muted); font-size: 0.9rem; }
+.small { font-size: 0.95rem; }
+
+@media (min-width: 800px) {
+  .preview-grid { grid-template-columns: 1fr 1fr; }
+  .upload-form { justify-content: space-between; }
+}

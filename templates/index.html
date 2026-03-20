@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ImagePro Face Protection</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-icon">✨</div>
+          <div>
+            <h1>ImagePro</h1>
+            <p>Face Protection & AI-Resistant Processing</p>
+          </div>
+        </div>
+        <div class="account-chip">Free User</div>
+      </header>
+
+      <main class="main-content">
+        <section class="hero">
+          <h2>Protect your image before AI can recognize it</h2>
+          <p>Upload any photo and apply advanced privacy transforms with one click.</p>
+        </section>
+
+        <section class="upload-card card">
+          <form method="POST" enctype="multipart/form-data" class="upload-form">
+            <input id="image-upload" type="file" name="image" accept="image/*" required />
+            <button type="submit">Protect Image</button>
+          </form>
+          <p class="hint">Supported formats: PNG, JPG, WEBP. Max size: 10MB.</p>
+        </section>
+
+        {% if output.original and output.processed %}
+        <section class="preview-grid">
+          <article class="preview-card card">
+            <h3>Original Image</h3>
+            <img src="{{ output.original }}" alt="original" loading="lazy" />
+          </article>
+
+          <article class="preview-card card">
+            <h3>Protected Image</h3>
+            <img src="{{ output.processed }}" alt="processed" loading="lazy" />
+            <a class="download-btn" href="{{ output.processed }}" download="protected_image.png">Download Protected Image</a>
+          </article>
+        </section>
+        {% endif %}
+
+        <section class="footer-card card small">
+          <p>
+            This tool applies multi-layer protection: pixelation, subtle noise, watermarking and lossless-safe compression.
+          </p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
