@@ -1,4 +1,4 @@
-export const processImage = async (file: File): Promise<string> => {
+export const processImage = async (file: File): Promise<{processed: string, original: string}> => {
   const formData = new FormData();
   formData.append('image', file);
 
@@ -18,7 +18,7 @@ export const processImage = async (file: File): Promise<string> => {
       throw new Error('Invalid response from server');
     }
     
-    return data.processed;
+    return data;
   } catch (error) {
     console.error('API Error:', error);
     throw error;

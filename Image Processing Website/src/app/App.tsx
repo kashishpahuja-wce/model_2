@@ -6,14 +6,26 @@ import { AdModal } from './components/AdModal';
 import { PremiumModal } from './components/PremiumModal';
 import { PaymentModal } from './components/PaymentModal';
 import { AccountButton } from './components/AccountButton';
+import { HistorySection } from './components/HistorySection';
 import { processImage, downloadImage } from './utils/imageProcessing';
 import { getAccount, incrementImageCount, upgradeToPremium, UserAccount, FREE_IMAGE_LIMIT } from './types/account';
 import { toast } from 'sonner';
+
+interface HistoryItem {
+  id: string;
+  original: string;
+  processed: string;
+  timestamp: number;
+}
 
 export default function App() {
   const [account, setAccount] = useState<UserAccount>(getAccount());
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [processedImage, setProcessedImage] = useState<string | null>(null);
+  const [history, setHistory] = useState<HistoryItem[]>(() => {
+    const saved = localStorage.getItem('image_history');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -49,9 +61,23 @@ export default function App() {
 
   const processImageFile = async (file: File) => {
     try {
-      const processed = await processImage(file);
-      setProcessedImage(processed);
+      const data = await processImage(file);
+      setProcessedImage(data.processed);
+      setOriginalImage(data.original);
       setIsProcessing(false);
+
+      // Add to history
+      const newItem: HistoryItem = {
+        id: Math.random().toString(36).substr(2, 9),
+        original: data.original,
+        processed: data.processed,
+        timestamp: Date.now(),
+      };
+      
+      const updatedHistory = [newItem, ...history].slice(0, 6); // Keep last 6
+      setHistory(updatedHistory);
+      localStorage.setItem('image_history', JSON.stringify(updatedHistory));
+      
     } catch (error) {
       console.error('Error processing image:', error);
       toast.error('Failed to process image. Please try again.');
@@ -156,6 +182,9 @@ export default function App() {
               showSuccess={showSuccess}
             />
           )}
+
+          {/* History Section */}
+          <HistorySection items={history} />
 
           {/* Limit Warning */}
           {account.accountType === 'free' && account.imagesRemaining === 0 && !originalImage && (

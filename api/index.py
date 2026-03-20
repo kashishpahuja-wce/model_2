@@ -4,10 +4,43 @@ import cv2
 import numpy as np
 import os
 import base64
+import requests
+import uuid
+from dotenv import load_dotenv
+
+# Load environment variables for local dev
+load_dotenv()
 
 app = Flask(__name__)
 # Enable CORS for local dev
 CORS(app)
+
+BLOB_READ_WRITE_TOKEN = os.environ.get('BLOB_READ_WRITE_TOKEN')
+
+def upload_to_blob(image_bytes, filename):
+    """Upload bytes to Vercel Blob and return the URL."""
+    if not BLOB_READ_WRITE_TOKEN:
+        print("Warning: BLOB_READ_WRITE_TOKEN not set. Falling back to base64.")
+        return None
+
+    # Vercel Blob PUT implementation via HTTP API
+    url = f"https://blob.vercel-storage.com/{filename}"
+    headers = {
+        "Authorization": f"Bearer {BLOB_READ_WRITE_TOKEN}",
+        "x-api-version": "2022-09-01"
+    }
+    
+    try:
+        response = requests.put(url, data=image_bytes, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            return data.get('url')
+        else:
+            print(f"Blob Upload Error: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        print(f"Blob Upload Exception: {str(e)}")
+        return None
 
 def find_face_mask(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -176,12 +209,32 @@ def process():
     # Apply protection
     protected = protect_image(img_arr)
 
-    # Convert to base64
-    _, buffer = cv2.imencode('.png', protected)
-    encoded_string = base64.b64encode(buffer).decode('utf-8')
-    data_url = f"data:image/png;base64,{encoded_string}"
+    # Encode images to bytes
+    _, orig_buffer = cv2.imencode('.png', img_arr)
+    _, prot_buffer = cv2.imencode('.png', protected)
+    
+    # Generate unique filenames
+    uid = uuid.uuid4().hex[:8]
+    orig_filename = f"original_{uid}.png"
+    prot_filename = f"protected_{uid}.png"
 
-    return jsonify({'processed': data_url})
+    # Upload to Vercel Blob
+    orig_url = upload_to_blob(orig_buffer.tobytes(), orig_filename)
+    prot_url = upload_to_blob(prot_buffer.tobytes(), prot_filename)
+
+    # Fallback to base64 if upload failed or token is missing
+    if not prot_url:
+        encoded_string = base64.b64encode(prot_buffer).decode('utf-8')
+        prot_url = f"data:image/png;base64,{encoded_string}"
+    
+    if not orig_url:
+        encoded_orig = base64.b64encode(orig_buffer).decode('utf-8')
+        orig_url = f"data:image/png;base64,{encoded_orig}"
+
+    return jsonify({
+        'processed': prot_url,
+        'original': orig_url
+    })
 
 # Keep this for local dev via `python index.py`
 if __name__ == '__main__':
