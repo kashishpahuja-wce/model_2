@@ -1,5 +1,10 @@
 {
   "outputDirectory": "dist",
+  "functions": {
+    "api/**/*.py": {
+      "excludeFiles": "{node_modules,src,public,dist}/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",

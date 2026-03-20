@@ -2,8 +2,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import cv2
 import numpy as np
-from PIL import Image
-from scipy.fft import dct, idct
 import os
 import base64
 
@@ -104,16 +102,15 @@ def _attack_dct_global(image):
             for bx in range(0, w - block + 1, block):
                 if np.random.random() < skip_prob:
                     continue
-                patch  = channel[by:by + block, bx:bx + block]
-                coeffs = dct(dct(patch, axis=0, norm='ortho'), axis=1, norm='ortho')
+                patch  = channel[by:by + block, bx:bx + block].astype(np.float32)
+                coeffs = cv2.dct(patch)
                 strength = np.random.uniform(8.0, 20.0)
-                noise    = np.random.normal(0, strength, (block, block))
+                noise    = np.random.normal(0, strength, (block, block)).astype(np.float32)
                 noise[0, 0] = 0
                 noise[0, 1] *= 0.1
                 noise[1, 0] *= 0.1
                 coeffs += noise
-                channel[by:by + block, bx:bx + block] = \
-                    idct(idct(coeffs, axis=0, norm='ortho'), axis=1, norm='ortho')
+                channel[by:by + block, bx:bx + block] = cv2.idct(coeffs)
         out[:, :, c] = np.clip(channel, 0, 255).astype(np.uint8)
     return out
 
@@ -170,8 +167,11 @@ def process():
         return jsonify({'error': 'No image provided'}), 400
 
     img_file = request.files['image']
-    img = Image.open(img_file.stream).convert('RGB')
-    img_arr = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    file_bytes = np.frombuffer(img_file.read(), np.uint8)
+    img_arr = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+
+    if img_arr is None:
+        return jsonify({'error': 'Invalid image file'}), 400
 
     # Apply protection
     protected = protect_image(img_arr)
