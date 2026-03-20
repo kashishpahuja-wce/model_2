@@ -1,55 +1,28 @@
-export const processImage = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+export const processImage = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const response = await fetch('/api/process', {
+      method: 'POST',
+      body: formData,
+    });
     
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        if (!ctx) {
-          reject(new Error('Could not get canvas context'));
-          return;
-        }
-        
-        canvas.width = img.width;
-        canvas.height = img.height;
-        
-        // Draw original image
-        ctx.drawImage(img, 0, 0);
-        
-        // Apply some filters to "process" the image
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        // Apply brightness and contrast adjustments
-        for (let i = 0; i < data.length; i += 4) {
-          // Increase brightness slightly
-          data[i] = Math.min(255, data[i] * 1.1);     // R
-          data[i + 1] = Math.min(255, data[i + 1] * 1.1); // G
-          data[i + 2] = Math.min(255, data[i + 2] * 1.1); // B
-          
-          // Increase contrast
-          const factor = 1.2;
-          data[i] = Math.min(255, ((data[i] - 128) * factor) + 128);
-          data[i + 1] = Math.min(255, ((data[i + 1] - 128) * factor) + 128);
-          data[i + 2] = Math.min(255, ((data[i + 2] - 128) * factor) + 128);
-        }
-        
-        ctx.putImageData(imageData, 0, 0);
-        
-        // Convert to base64
-        resolve(canvas.toDataURL('image/png'));
-      };
-      
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = e.target?.result as string;
-    };
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to process image on the server');
+    }
     
-    reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsDataURL(file);
-  });
+    const data = await response.json();
+    if (!data.processed) {
+      throw new Error('Invalid response from server');
+    }
+    
+    return data.processed;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
 };
 
 export const downloadImage = (dataUrl: string, filename: string = 'processed-image.png') => {
